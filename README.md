@@ -36,6 +36,6 @@ in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:loppers, "~> 0.1.0"}]
+  [{:loppers, "~> 0.1.1"}]
 end
 ```
