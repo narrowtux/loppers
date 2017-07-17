@@ -1,7 +1,6 @@
 defmodule LoppersTest.Walk do
   use ExUnit.Case
   doctest Loppers
-  alias Loppers.{Walk}
 
   @examples "./test/examples/"
   @whitelist Loppers.module_support() ++ Loppers.special_forms() ++ Loppers.operators()
@@ -27,14 +26,27 @@ defmodule LoppersTest.Walk do
     test_allow("imports.ex", whitelist)
   end
 
-  def test_allow(file, whitelist) do
+  test "imports.ex blacklisted" do
+    blacklist = [
+      {String, :to_integer}
+    ]
+
+    quoted = get_file("imports.ex")
+
+    assert {:error, [_]} = Loppers.validate(quoted, blacklist: blacklist)
+
+  end
+
+  def get_file(file) do
     file = "#{@examples}#{file}"
     source = File.read!(file)
     {:ok, quoted} = Code.string_to_quoted(source, file: file)
+    quoted
+  end
 
-    # add alias info
-    {quoted, _acc} = Walk.walk(quoted, {%{}, [{Kernel, []}]}, &Walk.gen_meta/2)
+  def test_allow(file, whitelist) do
+    quoted = get_file(file)
 
-    assert :ok = Loppers.validate_whitelist(quoted, whitelist)
+    assert :ok = Loppers.validate(quoted, whitelist: whitelist)
   end
 end

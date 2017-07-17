@@ -28,6 +28,6 @@ defmodule Loppers.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [{:ex_doc, "~> 0.16.2"}]
   end
 end
