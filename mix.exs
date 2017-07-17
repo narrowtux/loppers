@@ -3,11 +3,24 @@ defmodule Loppers.Mixfile do
 
   def project do
     [app: :loppers,
-     version: "0.1.0",
+     version: "0.1.1",
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps()]
+     deps: deps(),
+     package: package()]
+  end
+
+  def package do
+    [
+      licenses: ["MIT"],
+      maintainers: ["Moritz Schmale"],
+      links: %{
+        "GitHub" => "https://github.com/narrowtux/loppers"
+      },
+      description: "Validate quoted Elixir AST against a function whitelist",
+      source_url: "https://github.com/narrowtux/loppers/"
+    ]
   end
 
   # Configuration for the OTP application
@@ -28,6 +41,6 @@ defmodule Loppers.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:ex_doc, "~> 0.16.2"}]
+    [{:ex_doc, "~> 0.16.2", only: :dev, runtime: false}]
   end
 end
