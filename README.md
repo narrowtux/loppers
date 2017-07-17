@@ -1,6 +1,23 @@
 # Loppers
 
-Loppers will check function calls of an AST against white- and blacklists.
+A code validator for the Elixir-AST.
+
+It can operate on both white- and blacklists.
+
+## Basic example:
+```elixir
+quoted = quote do
+  "hello"
+  |> String.upcase
+  |> String.pad_leading(4, "0")
+end
+whitelist = Loppers.special_forms ++ [
+  {Kernel, :|>},
+  {String, :upcase},
+  {String, :pad_leading}
+]
+:ok = Loppers.validate(quoted, whitelist: whitelist)
+```
 
 ## Installation
 
