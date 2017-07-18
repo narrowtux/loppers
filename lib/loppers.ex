@@ -54,12 +54,13 @@ defmodule Loppers do
     {:error, [error]}
   def validate(quoted, opts) do
     {quoted, _acc} = Walk.walk(quoted, {%{}, [{Kernel, []}]}, &Walk.gen_meta/2)
+    {quoted, _acc} = Walk.walk(quoted, [], &Walk.module_functions/2)
     whitelist = Keyword.get(opts, :whitelist, nil)
     blacklist = Keyword.get(opts, :blacklist, [])
-    acc = Validate.validate(quoted, [], fn ast, acc ->
+    acc = Validate.validate(quoted, [], fn {_, meta, _} = ast, acc ->
       # IO.inspect ast
       if Match.is_fn?(ast) do
-        if (whitelist == nil or List.in_list?(ast, whitelist))
+        if (Keyword.get(meta, :allow, false) or whitelist == nil or List.in_list?(ast, whitelist))
           and not List.in_list?(ast, blacklist) do
           acc
         else
@@ -86,7 +87,9 @@ defmodule Loppers do
       {Kernel, :/},
       {Kernel, :-},
       {Kernel, :<<>>},
-      {Kernel, :<>}
+      {Kernel, :<>},
+      :"->",
+      :<-
     ]
   end
 

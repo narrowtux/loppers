@@ -37,6 +37,14 @@ defmodule LoppersTest.Walk do
 
   end
 
+  test "binary_match.ex" do
+    whitelist = @whitelist ++ [
+      {Enum, :__all__}
+    ]
+
+    test_allow("binary_match.ex", whitelist)
+  end
+
   def get_file(file) do
     file = "#{@examples}#{file}"
     source = File.read!(file)

@@ -85,6 +85,37 @@ defmodule Loppers.Walk do
     {ast, {aliases, imports}}
   end
 
+  @defs ~w[def defp defmacro defmacrop]a
+
+  def module_functions({:defmodule, _, [_aliases, args]} = module, _current_functions) do
+    contents = case Keyword.get(args, :do, {:__block__, [], []}) do
+      {:__block__, _, contents} -> contents
+      {defs, _, _} = content when defs in @defs -> [content]
+    end
+    functions =
+      contents
+      |> Enum.filter(fn
+        {defs, _, _} when defs in @defs -> true
+        _ -> false
+      end)
+      |> Enum.map(fn {_, _, [{name, _, _} | _]} -> name end)
+
+    {module, functions}
+  end
+
+  def module_functions({fun, meta, args}, current_functions) do
+    meta = if fun in current_functions and
+      (!Keyword.get(meta, :alias) && !Keyword.get(meta, :import)) do
+      Keyword.put(meta, :allow, true)
+    else
+      meta
+    end
+
+    {{fun, meta, args}, current_functions}
+  end
+
+  def module_functions(ast, acc), do: {ast, acc}
+
   def function_imported?({module, opts}, function, arity) do
     excluded = {function, arity} in Keyword.get(opts, :except, [])
     included = case Keyword.get(opts, :only) do

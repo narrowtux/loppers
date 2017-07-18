@@ -17,6 +17,13 @@ defmodule Loppers.Validate do
     validator.(ast, acc)
   end
 
+  # special case for binary pattern match
+  def validate({:=, _meta, [{:<<>>, _meta, _args} = lhs, rhs]} = ast, acc, validator) do
+    acc = validator.(ast, acc)
+    acc = validator.(lhs, acc)
+    validate(rhs, acc, validator)
+  end
+
   def validate({fun, _meta, args} = ast, acc, validator) do
     acc = validator.(ast, acc)
     acc = validate(fun, acc, validator)
