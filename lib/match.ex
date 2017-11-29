@@ -13,7 +13,7 @@ defmodule Loppers.Match do
   # ABC.fun(1, 2, 3)
   # {{:., [], [{:__aliases__, [alias: false], [:ABC]}, :fun]}, [], [1, 2, 3]}
 
-  def matches?({{:., _dot_meta, [{:__aliases__, aliases, called_as}, called_fn]}, _fn_meta, arguments}, {mod, list_fn})
+  def matches?({{:., _dot_meta, [{:__aliases__, aliases, called_as}, called_fn]}, _fn_meta, _arguments}, {mod, list_fn})
   when called_fn == list_fn or list_fn == :__all__ do
     called_module = case Keyword.get(aliases, :alias, false) do
       false -> list_to_module(called_as)
@@ -24,7 +24,7 @@ defmodule Loppers.Match do
   end
 
   # special case for calling erlang module functions
-  def matches?({{:., _dot_context, [erlang_module, called_fn]}, _fn_context, arguments}, {mod, list_fn})
+  def matches?({{:., _dot_context, [erlang_module, called_fn]}, _fn_context, _arguments}, {mod, list_fn})
     when (called_fn == list_fn or list_fn == :__all__)
     and erlang_module == mod do
     true
@@ -34,7 +34,7 @@ defmodule Loppers.Match do
   # map(:a, :b)
   # {:map, [context: Elixir, import: Enum], [:a, :b]}
 
-  def matches?({function, context, arguments}, {mod, function}) do
+  def matches?({function, context, _arguments}, {mod, function}) do
     called_module = Keyword.get(context, :import)
 
     mod == called_module
