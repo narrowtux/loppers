@@ -34,10 +34,10 @@ defmodule Loppers.Match do
   # map(:a, :b)
   # {:map, [context: Elixir, import: Enum], [:a, :b]}
 
-  def matches?({function, context, _arguments}, {mod, function}) do
+  def matches?({called_fn, context, _arguments}, {mod, list_fn}) do
     called_module = Keyword.get(context, :import)
 
-    mod == called_module
+    mod == called_module && (list_fn == called_fn || list_fn == :__all__)
   end
 
 

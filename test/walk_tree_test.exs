@@ -44,6 +44,14 @@ defmodule LoppersTest.Walk do
 
     test_allow("binary_match.ex", whitelist)
   end
+  
+  test "import_all_macros.ex" do
+    whitelist = @whitelist ++ [
+      {Kernel, :__all__}
+    ]
+
+    test_allow("import_all_macros.ex", whitelist)
+  end
 
   def get_file(file) do
     file = "#{@examples}#{file}"
