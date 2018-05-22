@@ -53,6 +53,23 @@ defmodule LoppersTest.Walk do
     test_allow("import_all_macros.ex", whitelist)
   end
 
+  test "creating_atoms.ex" do
+    quoted = get_file("creating_atoms.ex")
+
+    # Blacklisting works
+    blacklist = [
+      {:erlang, :binary_to_atom}
+    ]
+    assert {:error, [not_allowed: {{:., _, [:erlang, :binary_to_atom]}, _, _}]} = Loppers.validate(quoted, blacklist: blacklist)
+
+    # Whitelisting works.
+    whitelist = @whitelist ++ [
+      {Kernel, :__all__},
+      {:erlang, :binary_to_atom}
+    ]
+    test_allow("creating_atoms.ex", whitelist)
+  end
+
   def get_file(file) do
     file = "#{@examples}#{file}"
     source = File.read!(file)
