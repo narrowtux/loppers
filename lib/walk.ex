@@ -1,6 +1,11 @@
 defmodule Loppers.Walk do
   import Loppers.Match, only: [list_to_module: 1]
 
+  @doc """
+  Walking a given ast filling the accumulator using a walker-function.
+
+  Walker signature needs to be `walker.(ast, acc)`
+  """
   def walk({_, _, _} = ast, acc, walker) do
     {{fun, meta, args}, acc} = walker.(ast, acc)
     {args, _acc} = reduce_args(args, acc, walker)
@@ -32,6 +37,7 @@ defmodule Loppers.Walk do
     reduce_args(list, acc, walker)
   end
 
+  @doc "Helper to call walker callback for each args."
   def reduce_args(nil, acc, _) do
     {nil, acc}
   end
@@ -39,6 +45,76 @@ defmodule Loppers.Walk do
     Enum.map_reduce(args, acc, &walk(&1, &2, walker))
   end
 
+
+  # Testing walk() or recurse()
+  #def inspect(a, b), do: {a, b} |> IO.inspect(label: "inspect")
+
+
+
+  def track_parent_modules({:defmodule, meta_defmodule, [{:__aliases__, aliases_meta, parent_modules} | rest]}, acc) do
+
+    # Add defined module to parent_modules in acc for whole branch.
+
+    ast = {:defmodule, meta_defmodule, [{:__aliases__, aliases_meta, parent_modules} | rest]}
+    acc = Map.update(acc, :parent_modules, parent_modules, &(&1 ++ parent_modules))
+
+    {ast, acc}
+  end
+
+  def track_parent_modules({fun, meta, args}, acc) do
+
+    # Add parent_modules to meta of function call from acc.
+    meta = Keyword.put(meta, :parent_modules, Map.get(acc, :parent_modules, []))
+
+    {{fun, meta, args}, acc}
+  end
+
+  def track_parent_modules(ast, acc), do: {ast, acc}
+
+
+
+
+  @doc """
+  Recursing into the AST. Difference to walk() is that the accumulator will only be changed for current branch.
+  """
+  def recurse({_, _, _} = ast, acc, callback) do
+    {{fun, meta, args}, acc} = callback.(ast, acc)
+
+    {args, _acc} = recurse(args, acc, callback)
+    {fun, _acc} = recurse(fun, acc, callback)
+
+    {{fun, meta, args}, acc}
+  end
+
+
+  def recurse({key, value}, acc, callback) do
+    {{key, value}, acc} = callback.({key, value}, acc)
+    {key, _acc} = recurse(key, acc, callback)
+    {value, _acc} = recurse(value, acc, callback)
+    {{key, value}, acc}
+  end
+
+
+  def recurse(ast, acc, callback) when is_list(ast) do
+    {Enum.map(ast, fn(ast_entry) ->
+      ast_entry |> recurse(acc, callback) |> elem(0)
+    end), acc}
+  end
+
+  def recurse(primitive, acc, callback) do
+     callback.(primitive, acc)
+  end
+
+
+
+
+
+
+
+
+  @doc """
+  Walk callback for collecting metadata like aliases and imports.
+  """
   def gen_meta({:alias, _, args} = ast, {aliases, imports}) do
     {aka, opts} = case args do
       [aka, opts] -> {aka, opts}
@@ -87,6 +163,9 @@ defmodule Loppers.Walk do
 
   @defs ~w[def defp defmacro defmacrop]a
 
+  @doc """
+  Walk callback for collecting metadata like aliases and imports.
+  """
   def module_functions({:defmodule, _, [_aliases, args]} = module, _current_functions) do
     contents = case Keyword.get(args, :do, {:__block__, [], []}) do
       {:__block__, _, contents} -> contents
@@ -116,6 +195,8 @@ defmodule Loppers.Walk do
 
   def module_functions(ast, acc), do: {ast, acc}
 
+
+  @doc "Helper to check if a function is imported in a given module."
   def function_imported?({module, opts}, function, arity) do
     excluded = {function, arity} in Keyword.get(opts, :except, [])
     included = case Keyword.get(opts, :only) do

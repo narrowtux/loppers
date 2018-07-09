@@ -50,4 +50,16 @@ defmodule LoppersTest do
     quoted = quote do mod.foo(1) end
     assert Match.matches?(quoted, {Module, :foo}) == false
   end
+
+  test "submodules are recursive allowed" do
+    quoted = quote do Module.Child.foo(1) end
+    assert Match.matches?(quoted, {Module, :__submodules_all__}) == true
+
+    quoted = quote do Module.Child.Sub.foo(1) end
+    assert Match.matches?(quoted, {Module.Child, :__submodules_all__}) == true
+
+    quoted = quote do Module.foo(1) end
+    assert Match.matches?(quoted, {Module2, :__submodules_all__}) == false
+  end
+
 end
