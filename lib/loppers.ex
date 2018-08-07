@@ -5,6 +5,7 @@ defmodule Loppers do
     {:not_allowed, ast :: term}
   @type function_ref ::
     {module :: atom, :__all__} |
+    {module :: atom, :__submodules_all__} |
     {module :: atom, function :: atom} |
     function :: atom
 
@@ -42,7 +43,19 @@ defmodule Loppers do
       iex> blacklist = [{Enum, :map_reduce}]
       iex> quoted = quote do Enum.map_reduce([], nil, &({&1, nil})) end
       iex> Loppers.validate(quoted, [whitelist: whitelist, blacklist: blacklist])
-      {:error, [not_allowed: {{:., [], [{:__aliases__, [alias: false], [:Enum]}, :map_reduce]}, [], [[], nil, {:&, [], [{{:&, [], [1]}, nil}]}]}]}
+      {:error, [
+        not_allowed: {{:., [parent_modules: []],
+          [
+            {:__aliases__, [parent_modules: [], alias: false], [:Enum]},
+            :map_reduce
+          ]}, [parent_modules: []],
+         [
+           [],
+           nil,
+           {:&, [parent_modules: []],
+            [{{:&, [parent_modules: []], [1]}, nil}]}
+         ]}
+      ]}
 
   ## Options
 
@@ -55,6 +68,7 @@ defmodule Loppers do
   def validate(quoted, opts) do
     {quoted, _acc} = Walk.walk(quoted, {%{}, [{Kernel, []}]}, &Walk.gen_meta/2)
     {quoted, _acc} = Walk.walk(quoted, [], &Walk.module_functions/2)
+    {quoted, _acc} = Walk.recurse(quoted, %{}, &Walk.track_parent_modules/2)
     whitelist = Keyword.get(opts, :whitelist, nil)
     blacklist = Keyword.get(opts, :blacklist, [])
     acc = Validate.validate(quoted, [], fn {_, meta, _} = ast, acc ->

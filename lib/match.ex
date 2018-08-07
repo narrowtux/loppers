@@ -13,6 +13,23 @@ defmodule Loppers.Match do
   # ABC.fun(1, 2, 3)
   # {{:., [], [{:__aliases__, [alias: false], [:ABC]}, :fun]}, [], [1, 2, 3]}
 
+  # Handling :__submodules_all__
+  def matches?({{:., _dot_meta, [{:__aliases__, aliases, called_as}, _called_fn]}, fn_meta, _arguments}, {mod, :__submodules_all__}) do
+
+    called_module = case Keyword.get(aliases, :alias, false) do
+      false ->
+        parent_modules = Keyword.get(fn_meta, :parent_modules, [])
+        list_to_module(parent_modules ++ called_as)
+
+      aliased_module ->
+        aliased_module
+    end
+
+    # Check if "Module.Child" has the Prefix for "Module."
+    String.starts_with?("#{called_module}", "#{mod}.")
+  end
+
+
   def matches?({{:., _dot_meta, [{:__aliases__, aliases, called_as}, called_fn]}, _fn_meta, _arguments}, {mod, list_fn})
   when called_fn == list_fn or list_fn == :__all__ do
     called_module = case Keyword.get(aliases, :alias, false) do

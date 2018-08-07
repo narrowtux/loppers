@@ -28,6 +28,9 @@ whitelist = Loppers.special_forms ++ [
    the `Loppers.Walk` module)
  * Returns the AST-Fragment (including the line number if your compiler provides it)
    so you can add squiggly lines to the editor at the right place.
+ * Whitelist a module with functions with `{Application.Callbacks, :__all__}`
+ * Whitelist a module with all child-modules and functions with `{Application.Callbacks, :__submodules_all__}`
+
 
 ## Installation
 
