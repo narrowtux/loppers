@@ -114,7 +114,8 @@ defmodule Loppers do
     [
       {Kernel, :@},
       {Kernel, :defmodule},
-      {Kernel, :def}
+      {Kernel, :def},
+      :when
     ]
   end
 

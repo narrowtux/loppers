@@ -7,5 +7,11 @@ defmodule When do
       i when is_binary(i) -> i <> "abc"
       _ -> :error
     end
+
+    bar(i)
+  end
+
+  def bar(i) when is_integer(i) do
+    :ok
   end
 end

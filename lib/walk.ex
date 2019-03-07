@@ -177,7 +177,10 @@ defmodule Loppers.Walk do
         {defs, _, _} when defs in @defs -> true
         _ -> false
       end)
-      |> Enum.map(fn {_, _, [{name, _, _} | _]} -> name end)
+      |> Enum.map(fn
+        {_def, _ctx1, [{:when, _ctx2, [{name, _ctx3, _args} | _]} | _]} -> name
+        {_def, _ctx1, [{name, _ctx2, _args} | _]} -> name
+      end)
 
     {module, functions}
   end

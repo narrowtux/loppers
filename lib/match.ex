@@ -57,7 +57,6 @@ defmodule Loppers.Match do
     mod == called_module && (list_fn == called_fn || list_fn == :__all__)
   end
 
-
   def matches?(_, _) do
     false
   end
