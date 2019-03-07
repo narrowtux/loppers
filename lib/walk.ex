@@ -14,11 +14,6 @@ defmodule Loppers.Walk do
     {ast, acc}
   end
 
-  def walk([{key, {_, _, _} = call}], acc, walker) do
-    {call, acc} = walk(call, acc, walker)
-    {[{key, call}], acc}
-  end
-
   def walk(primitive, acc, _walker)
     when is_atom(primitive) or
          is_number(primitive) or

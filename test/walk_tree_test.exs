@@ -108,6 +108,12 @@ defmodule LoppersTest.Walk do
     test_allow("defp.ex", whitelist)
   end
 
+  test "defdo.ex" do
+    whitelist = @whitelist ++ [{Map, :new}]
+
+    test_allow("defdo.ex", whitelist)
+  end
+
   def get_file(file) do
     file = "#{@examples}#{file}"
     source = File.read!(file)
