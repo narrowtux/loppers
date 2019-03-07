@@ -44,7 +44,7 @@ defmodule LoppersTest.Walk do
 
     test_allow("binary_match.ex", whitelist)
   end
-  
+
   test "import_all_macros.ex" do
     whitelist = @whitelist ++ [
       {Kernel, :__all__}
@@ -94,6 +94,18 @@ defmodule LoppersTest.Walk do
            :question
          ]}, [parent_modules: [:ParentModule], line: 38], []}
      ]} = Loppers.validate(get_file("submodules.ex"), whitelist: whitelist)
+  end
+
+  test "when.ex" do
+    whitelist = @whitelist
+
+    test_allow("when.ex", whitelist)
+  end
+
+  test "defp.ex" do
+    whitelist = @whitelist ++ [{Kernel, :defp}]
+
+    test_allow("defp.ex", whitelist)
   end
 
   def get_file(file) do

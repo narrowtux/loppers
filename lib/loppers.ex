@@ -4,10 +4,10 @@ defmodule Loppers do
   @type error ::
     {:not_allowed, ast :: term}
   @type function_ref ::
-    {module :: atom, :__all__} |
+{module :: atom, :__all__} |
     {module :: atom, :__submodules_all__} |
     {module :: atom, function :: atom} |
-    function :: atom
+    (function :: atom)
 
   @type validate_option ::
     {:whitelist, [function_ref]} |
@@ -124,8 +124,14 @@ defmodule Loppers do
   Without those it's going to be hard to write any elixir code.
   """
   def special_forms do
-    [:functions, :macros]
-    |> Enum.flat_map(&Kernel.SpecialForms.__info__/1)
-    |> Keyword.keys()
+    special_forms =
+      [:functions, :macros]
+      |> Enum.flat_map(&Kernel.SpecialForms.__info__/1)
+      |> Keyword.keys()
+    special_forms ++ [
+      :{},
+      :doc,
+      {Kernel, :is_binary}
+    ]
   end
 end
