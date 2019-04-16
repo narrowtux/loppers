@@ -132,6 +132,7 @@ defmodule Loppers do
     special_forms ++ [
       :{},
       :doc,
+      :->,
       {Kernel, :is_binary}
     ]
   end
