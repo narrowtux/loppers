@@ -113,6 +113,12 @@ defmodule LoppersTest.Walk do
 
     test_allow("defdo.ex", whitelist)
   end
+  
+  test "case and -> special form" do
+    whitelist = @whitelist ++ Loppers.special_forms()
+    
+    test_allow("case.ex", whitelist)
+  end
 
   def get_file(file) do
     file = "#{@examples}#{file}"
