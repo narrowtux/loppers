@@ -120,6 +120,12 @@ defmodule LoppersTest.Walk do
     test_allow("case.ex", whitelist)
   end
 
+  test "sigils" do
+    whitelist = @whitelist ++ Loppers.special_forms() ++ [{Kernel, :__all__}]
+
+    test_allow("sigils.ex", whitelist)
+  end
+
   def get_file(file) do
     file = "#{@examples}#{file}"
     source = File.read!(file)
