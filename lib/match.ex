@@ -52,9 +52,31 @@ defmodule Loppers.Match do
   # {:map, [context: Elixir, import: Enum], [:a, :b]}
 
   def matches?({called_fn, context, _arguments}, {mod, list_fn}) do
-    called_module = Keyword.get(context, :import)
+    module_candidates =
+      cond do
+        Keyword.has_key?(context, :import) ->
+          [Keyword.get(context, :import)]
 
-    mod == called_module && (list_fn == called_fn || list_fn == :__all__)
+        Keyword.has_key?(context, :imports) ->
+          context
+          |> Keyword.get(:imports, [])
+          |> Enum.map(&elem(&1, 1))
+          |> Enum.uniq()
+
+        true ->
+          []
+      end
+
+    called_module = List.first(module_candidates)
+
+    cond do
+      length(module_candidates) > 1 -> false
+      length(module_candidates) == 0 -> false
+      true ->
+        mod == called_module && (list_fn == called_fn || list_fn == :__all__)
+    end
+
+
   end
 
   def matches?(_, _) do
